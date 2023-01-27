@@ -738,3 +738,15 @@ function selectMenu {
 		break
 		done
 }
+################################################################################
+# Select All of Records
+function selectAll {
+	read -p "Enter Table Name: " tName
+	 
+	column -t -s ':' $tName 2>>./.error.log
+	if [[ $? != 0 ]]
+	then
+		echo "Error Displaying Table $tName"
+	fi
+	selectMenu
+}
