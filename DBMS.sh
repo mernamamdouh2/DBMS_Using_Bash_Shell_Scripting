@@ -246,3 +246,22 @@ function displayTable {
 	fi
 }
 ################################################################################
+# Delete Table
+function deleteTable {
+	read -p "Enter Name of the table to Delete: " dbtable
+	
+	# table not exist
+	if ! [[ -f "$dbtable" ]] 
+	then
+		echo -e "This Table doesn't Exist."
+		sleep 1;
+	##########
+	# exists
+	else
+		rm "$dbtable"
+		echo -e "Table Deleted."
+		sleep 1;
+	fi
+}
+
+################################################################################
