@@ -534,121 +534,12 @@ function deleteTable {
 	then
 		echo -e "This Table doesn't Exist."
 		sleep 1;
+	##########
+	# exists
 	else
-		##########
-		## table exists
-		insertingData=true
-		while $insertingData  
-		do
-			# enter pk
-			## => enter pk of type "id" of type integer and size 1
-			echo -e "Enter Primary Key \"$(head -1 "$dbtable" |
-			 	cut -d ':' -f1 | awk -F "-" '{print $1}')\" of type $(head -1 "$dbtable" |
-			  	cut -d ':' -f1 | awk -F "-" '{print $2}') and size $(head -1 "$dbtable" |
-			   	cut -d ':' -f1 | awk -F "-" '{print $3}')"
-
-			read
-			##########
-			# match data & size
-			check_type=$(check_dataType "$REPLY" "$dbtable" 1)
-			check_size=$(check_size "$REPLY" "$dbtable" 1)
-			#=> print all records except first record
-			pk_used=$(cut -d ':' -f1 "$dbtable" | awk '{if(NR != 1) print $0}' | grep -x -e "$REPLY") 
-			##########
-			# null entry
-			if [[ "$REPLY" == '' ]] 
-			then
-				echo -e "No entry."
-				sleep 1;
-			#############
-			# special characters
-			elif [[ $REPLY =~ [/.:\|\-] ]]
-			then
-				echo -e "You can't Enter these Characters => . / : - | "
-				sleep 1;
-			##########
-			# not matching datatype 
-			elif [[ "$check_type" == 0 ]] 
-			then 
-				echo -e "Entry Invalid."
-				sleep 1;
-			##########
-			# not matching size	
-			elif [[ "$check_size" == 0 ]] 
-			then
-				echo -e "Entry Size Invalid."
-				sleep 1;
-			##########
-			#! if primary key exists
-			elif ! [[ "$pk_used" == '' ]] 
-			then
-				echo -e "This Primary Key is already Used."
-				sleep 1;
-			##########
-			# primary key is valid
-			else 
-				echo -n "$REPLY" >> "$dbtable"
-				echo -n ':' >> "$dbtable"
-
-				# to get number of columns in table
-				num_col=$(head -1 "$dbtable" | awk -F: '{print NF}')
-				## to iterate over the columns after the primary key, in order to enter its data
-				for (( i = 2; i <= num_col; i++ )) 
-				do
-					# enter other data
-					inserting_other_data=true
-					while $inserting_other_data 
-					do
-						echo -e "Enter \"$(head -1 "$dbtable" |
-						 	cut -d ':' -f$i | awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "$dbtable" |
-						  	cut -d ':' -f$i | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "$dbtable" |
-						   	cut -d ':' -f$i | awk -F "-" 'BEGIN { RS = ":" } {print $3}')"
-
-						read
-						##########
-						# match data with its col datatype & size
-						check_type=$(check_dataType "$REPLY" "$dbtable" "$i")
-						check_size=$(check_size "$REPLY" "$dbtable" "$i")
-						##########
-						# not matching datatype
-						if [[ "$check_type" == 0 ]] 
-						then
-							echo -e "Entry Invalid."
-							sleep 1;
-						##########
-						# not matching size
-						elif [[ "$check_size" == 0 ]] 
-						then
-							echo -e "Entry Size Invalid."
-							sleep 1;
-						#############
-						# special characters
-						elif [[ $REPLY =~ [/.:\|\-] ]] 
-						then
-							echo -e "You can't Enter these Characters => . / : - | "
-							sleep 1;
-						##########
-						# entry is valid
-						else
-							##########
-							# if last column
-							if [[ i -eq $num_col ]] 
-							then
-								echo "$REPLY" >> "$dbtable"
-								inserting_other_data=false
-								insertingData=false
-								echo -e "Entry Inserted Successfully."
-							else
-								##########
-								# next column 
-								echo -n "$REPLY": >> "$dbtable"
-								inserting_other_data=false
-							fi
-						fi
-					done
-				done
-			fi
-		done
+		rm "$dbtable"
+		echo -e "Table Deleted."
+		sleep 1;
 	fi
 }
 
@@ -1414,6 +1305,8 @@ do
 					cd ..
 					welcomeScreen=false
 					dbsScreen=true
+                    tablesScreen=false
+					;;
                 * )
 					echo -e "Invalid Entry."
 					sleep 1;
