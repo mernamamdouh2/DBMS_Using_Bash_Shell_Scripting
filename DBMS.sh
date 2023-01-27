@@ -851,3 +851,37 @@ function selectCon {
 		break
 		done
 }
+################################################################################
+# Select all Columns under Condition
+function allCond {
+	echo -e "Select all columns from TABLE Where FIELD(OPERATOR)VALUE."
+	read -p "Enter Table Name: "  tName
+	read -p "Enter required FIELD name-type-size: " field
+	 
+	fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' $tName)
+	if [[ $fid == "" ]]
+	then
+		echo "Not Found."
+		selectCon
+	else
+		read -p "Supported Operators: [==, !=, >, <, >=, <=] Select OPERATOR: " op
+		 
+		if [[ $op == "==" ]] || [[ $op == "!=" ]] || [[ $op == ">" ]] || [[ $op == "<" ]] || [[ $op == ">=" ]] || [[ $op == "<=" ]]
+		then
+			read -p "Enter required VALUE: " val
+		 
+			res=$(awk 'BEGIN{FS=":"}{if ($'$fid$op$val') print $0}' $tName 2>>./.error.log |  column -t -s ':')
+		if [[ $res == "" ]]
+		then
+			echo "Value Not Found."
+			selectCon
+		else
+			awk 'BEGIN{FS=":"}{if ($'$fid$op$val') print $0}' $tName 2>>./.error.log |  column -t -s ':'
+			selectCon
+		fi
+		else
+			echo "Unsupported Operator."
+			selectCon
+		fi
+	fi
+}
