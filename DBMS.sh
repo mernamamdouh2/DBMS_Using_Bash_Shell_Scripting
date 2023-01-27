@@ -168,3 +168,40 @@ function dropDb {
 
 
 ################################################################################
+# Create Table & its metadata
+function createTable {
+		# table name
+		read -p "Enter Name of the Table: " dbtable
+		
+		# null entry
+		if [[ $dbtable = "" ]] 
+		then
+			echo -e "Invalid Entry, Please Enter a Correct Name."
+			sleep 1;
+		#############
+		# special characters
+		elif [[ $dbtable =~ [/.:\|\-] ]] 
+		then
+			echo -e "You can't Enter these Characters => . / : - | "
+			sleep 1;			
+		#############
+		# table name exists
+		elif [[ -e "$dbtable" ]] 
+		then
+			echo -e "This Table Name Exists."
+			sleep 1;		
+		#############
+		# new table
+		elif  [[ $dbtable =~ ^[a-zA-Z] ]] 
+		then
+			cd "./$DBNAME" > /dev/null 2>&1
+			touch "$dbtable"
+			createMetaData;
+		else
+			echo -e "Table Name can't Start with Numbers or Special Characters."
+			sleep 1;
+		fi
+		##########
+	# done
+}
+################################################################################
