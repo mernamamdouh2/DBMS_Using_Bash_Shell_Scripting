@@ -106,3 +106,36 @@ function connectDb {
 	fi
 }
 ################################################################################
+# Rename Database
+function renameDB {
+	echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
+	separator;
+		read -p "Enter Current Database Name: " DBNAME
+		read -p "Enter New Database Name: " newName
+		############
+		# null entry
+		if [[ "$DBNAME" = '' ]] 
+		then
+			echo -e "Invalid Entry, Please Enter a Correct Name."
+			sleep 1;
+		############
+		# DB doesn't exists
+		elif ! [[ -d "$DBNAME" ]] 
+		then
+			echo -e "This Database doesn't Exist."
+			sleep 1;
+		############
+		# rename DB	
+		elif [[ -d "$DBNAME" ]]
+		then
+			mv ./DBMS/$DBNAME ./DBMS/$newName  2>> ./.error.log
+			echo -e "Database $DBNAME Renamed Successfully and become $newName."
+			sleep 1;
+			dbsScreen=true
+			tablesScreen=false
+		else
+			echo "Error Renaming Database."
+			sleep 1;
+		fi
+}
+################################################################################
