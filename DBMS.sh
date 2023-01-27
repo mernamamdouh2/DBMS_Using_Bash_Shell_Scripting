@@ -409,7 +409,6 @@ function insertData {
 	fi
 }
 ################################################################################
-################################################################################
 # Display Record (Row)
 function displayRow {
 	# choose table
@@ -461,6 +460,55 @@ function displayRow {
 						"$dbtable" | cut -d: -f$i)
 			done
 			separator;
+		fi
+	fi
+}
+################################################################################
+# Delete Record (Row)
+function deleteRecord {
+	# choose table
+	read -p "Enter Name of the table: " dbtable
+
+	# not exist
+	if ! [[ -f "$dbtable" ]] 
+	then
+		echo -e "This Table doesn't Exist."
+		sleep 1;
+	else
+		##########
+		# table exists
+		##########
+		# enter pk
+		echo -e "enter primary key \"$(head -1 "$dbtable" |
+		 	cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "$dbtable" |
+		  	cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "$dbtable" |
+		   	cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}') of the record to delete"
+		
+		read
+		#########
+		# get Number of this record
+		recordNum=$(cut -d ':' -f1 "$dbtable" | awk '{if(NR != 1) print $0}' | grep -x -n -e "$REPLY" | cut -d':' -f1)
+													#! -x => exact match // -e => pattern // -n record number prefix
+
+		##########
+		# null entry
+		if [[ "$REPLY" == '' ]] 
+		then
+			echo -e "No Entry."
+			sleep 1;
+		##########
+		# record not exists
+		elif [[ "$recordNum" = '' ]] 
+		then
+			echo -e "This Primary Key doesn't Exist."
+			sleep 1;
+		##########
+		# record exists
+		else
+			let recordNum=$recordNum+1 #!=> recordNum is 0 based but sed is 1 based
+			sed -i "${recordNum}d" "$dbtable"
+			echo -e "Record Deleted Successfully."
+			sleep 1;
 		fi
 	fi
 }
