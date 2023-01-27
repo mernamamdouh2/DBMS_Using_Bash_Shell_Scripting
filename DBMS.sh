@@ -409,3 +409,59 @@ function insertData {
 	fi
 }
 ################################################################################
+################################################################################
+# Display Record (Row)
+function displayRow {
+	# choose table
+	read -p "Enter Name of the table: " dbtable
+	 
+	# not exist
+	if ! [[ -f "$dbtable" ]] 
+	then
+		echo -e "This Table doesn't Exist."
+		sleep 1;
+	else
+		##########
+		## table exists
+		##########
+		# enter pk
+		echo "Enter Primary Key \"$(head -1 "$dbtable" | cut -d ':' -f1 |\
+			awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "$dbtable"\
+			| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "$dbtable"\
+			| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}') of the record"
+
+		read
+		
+		recordNum=$(cut -d ':' -f1 "$dbtable" | sed '1d'\
+		| grep -x -n -e "$REPLY" | cut -d':' -f1)
+
+		# null entry
+		if [[ "$REPLY" == '' ]] 
+		then
+			echo -e "No Entry."
+			sleep 1;
+		##########
+		# record not exists
+		elif [[ "$recordNum" = '' ]] 
+		then
+			echo -e "This Primary Key doesn't Exist."
+			sleep 1;
+		##########
+		# record exists
+		else
+			let recordNum=$recordNum+1
+			num_col=$(head -1 "$dbtable" | awk -F: '{print NF}') 
+			##########
+			# to show the other values of record
+			separator;
+			echo -e "Fields and Values of this Record: "
+			for (( i = 2; i <= num_col; i++ ))
+			do
+					echo \"$(head -1 $dbtable | cut -d ':' -f$i | awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" : $(sed -n "${recordNum}p" 
+						"$dbtable" | cut -d: -f$i)
+			done
+			separator;
+		fi
+	fi
+}
+################################################################################
