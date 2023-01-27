@@ -513,3 +513,189 @@ function deleteRecord {
 	fi
 }
 ################################################################################
+# Update Table
+function updateTable {
+	# choose table
+	read -p "Enter Name of the table: " dbtable
+
+	# not exist
+	if ! [[ -f "$dbtable" ]] 
+	then
+		echo -e "This Table doesn't Exist."
+		sleep 1;
+	else
+		##########
+		# table exists
+		##########
+		# enter pk
+		echo "Enter Primary Key \"$(head -1 "$dbtable" | cut -d ':' -f1 |\
+		awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "$dbtable"\
+		| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "$dbtable"\
+		| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}') of the record"
+		
+		read
+		
+		recordNum=$(cut -d ':' -f1 "$dbtable" | sed '1d'\
+		| grep -x -n -e "$REPLY" | cut -d':' -f1)
+		##########
+		# null entry
+		if [[ "$REPLY" == '' ]] 
+		then
+			echo -e "No Entry."
+			sleep 1;
+		##########
+		# record not exists
+		elif [[ "$recordNum" = '' ]] 
+		then
+			echo -e "This Primary Key doesn't Exist."
+			sleep 1;
+		##########
+		# record exists
+		else
+			let recordNum=$recordNum+1
+			##########
+			# to get number of columns in table
+			num_col=$(head -1 "$dbtable" | awk -F: '{print NF}') 
+			##########
+			# to show the other values of record
+			separator;
+			echo -e "Other Fields and Values of this Record: "
+			for (( i = 2; i <= num_col; i++ )) 
+			do
+					echo \"$(head -1 $dbtable | cut -d ':' -f$i |\
+					awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "$dbtable" | cut -d ':' -f$i |\
+					awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "$dbtable" | cut -d ':' -f$i |\
+					awk -F "-" 'BEGIN { RS = ":" } {print $3}'): $(sed -n "${recordNum}p" "$dbtable" | cut -d: -f$i)
+			done
+			separator;
+			##########
+			# to show the other fields' names of this record
+			echo -e "Record Fields: "
+			option=$(head -1 $dbtable | awk 'BEGIN{ RS = ":"; FS = "-" } {print $1}')
+			echo "$option"
+			getFieldName=true
+			while $getFieldName 
+			do
+				separator;
+				echo "Enter Field Name to Update"
+				read
+				##########
+				# null entry
+				if [[ "$REPLY" = '' ]] 
+				then
+					echo -e "Invalid Entry."
+					sleep 1;
+				##########
+				# field name not exists
+				elif [[ $(echo "$option" | grep -x "$REPLY") = "" ]]
+				then
+					echo -e "No such Field with the entered Name, Please Enter a Valid Field Name."
+					sleep 1;
+				##########
+				# field name exists
+				else
+					# get field number
+					fieldnum=$(head -1 "$dbtable" | awk 'BEGIN{ RS = ":"; FS = "-" } {print $1}'\
+					| grep -x -n "$REPLY" | cut -d: -f1)
+
+					updatingField=true
+					while $updatingField 
+					do
+						##########
+						# updating field's primary key
+						if [[ "$fieldnum" = 1 ]] 
+						then
+							echo enter primary key \"$(head -1 "$dbtable" | cut -d ':' -f1 |\
+							awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "$dbtable"\
+							| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "$dbtable"\
+							| cut -d ':' -f1 | awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+
+							read
+
+							check_type=$(check_dataType "$REPLY" "$dbtable" 1)
+							check_size=$(check_size "$REPLY" "$dbtable" 1)
+							pk_used=$(cut -d ':' -f1 "$dbtable" | awk '{if(NR != 1) print $0}' | grep -x -e "$REPLY")
+
+							##########
+							# null entry
+							if [[ "$REPLY" == '' ]] 
+							then
+								echo -e "No Entry, Id can't be Null."
+								sleep 1;
+							##########
+							#match datatype
+							elif [[ "$check_type" == 0 ]] 
+							then
+								echo -e "Entry Invalid."
+								sleep 1;
+							##########
+							# not matching size
+							elif [[ "$check_size" == 0 ]] 
+							then
+								echo -e "Entry Size Invalid."
+								sleep 1;
+							##########
+							# pk is used
+							elif ! [[ "$pk_used" == '' ]] 
+							then
+								echo -e "This Primary Key already Used."
+								sleep 1;
+							##########
+							# pk is valid
+							else 
+								awk -v fn="$fieldnum" -v rn="$recordNum" -v nv="$REPLY"\
+								'BEGIN { FS = OFS = ":" } { if(NR == rn)	$fn = nv } 1' "$dbtable"\
+								> "$dbtable".new && rm "$dbtable" && mv "$dbtable".new "$dbtable"
+
+								updatingField=false
+								getFieldName=false
+							fi
+						##########
+						# updating other field 
+						else
+							updatingField=true
+							while $updatingField 
+							do
+								echo enter \"$(head -1 $dbtable | cut -d ':' -f$fieldnum |\
+								awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "$dbtable" | cut -d ':' -f$fieldnum |\
+								awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "$dbtable" | cut -d ':' -f$fieldnum |\
+								awk -F "-" 'BEGIN { RS = ":" } {print $3}')
+
+								read
+
+								check_type=$(check_dataType "$REPLY" "$dbtable" "$fieldnum")
+								check_size=$(check_size "$REPLY" "$dbtable" "$fieldnum")
+
+								##########
+								# match datatype
+								if [[ "$check_type" == 0 ]] 
+								then
+									echo -e "Entry Invalid."
+									sleep 1;
+								##########
+								# not matching size
+								elif [[ "$check_size" == 0 ]] 
+								then
+									echo -e "Entry Size Invalid."
+									sleep 1;
+								##########
+								# entry is valid
+								else
+									awk -v fn="$fieldnum" -v rn="$recordNum" -v nv="$REPLY"\
+									'BEGIN { FS = OFS = ":" } { if(NR == rn)	$fn = nv } 1' "$dbtable"\
+									> "$dbtable".new && rm "$dbtable" && mv "$dbtable".new "$dbtable"
+
+									updatingField=false
+									getFieldName=false
+								fi
+							done
+						fi
+					done
+					echo -e "Field Updated Successfully."
+					sleep 1;
+				fi
+			done
+		fi
+		
+	fi
+}
