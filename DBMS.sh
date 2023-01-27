@@ -67,3 +67,42 @@ function listDb {
 	fi
 }
 ################################################################################
+# Connect to Database
+function connectDb {
+	# no databases exist
+	if [[ $(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d') = '' ]]
+	then
+		echo -e "There are no Databases here."
+		sleep 1;
+	############
+	# databases exist
+	else
+		echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
+		separator;
+			read -p "Enter the name of the Database:  " DBNAME
+			DBNAME="$DBNAME"
+			############
+			# null entry
+			if [[ "$DBNAME" = '' ]] 
+			then
+				echo -e "Invalid Entry, Please Enter a Correct Name."
+				sleep 1;
+			############
+			# DB doesn't exists
+			elif ! [[ -d "$DBNAME" ]]
+			then
+				echo -e "This Database doesn't Exist."
+				sleep 1;
+			############
+			# Connected to DB
+			else
+				cd "$DBNAME"
+				separator;
+				echo -e "The database Successfully Connected."
+				sleep 1;
+				dbsScreen=false
+				tablesScreen=true
+			fi
+	fi
+}
+################################################################################
