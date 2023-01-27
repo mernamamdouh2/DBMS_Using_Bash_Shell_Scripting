@@ -90,6 +90,174 @@ function welcomeScreen {
 	done 
 }
 
+################################################################################
+########################### DBs Screen #########################################
+################################################################################
+# Create Database
+function createDb {
+	read -p "Enter Database Name: " DBNAME
+	#############
+	# null entry
+	if [[ $DBNAME = "" ]]
+	then
+		echo -e "Invalid Entry, please Enter a Correct Name."
+		sleep 1;
+	#############
+	# special characters
+	elif [[ $DBNAME =~ [/.:\|\-] ]] 
+	then
+		echo -e "You can't Enter these Characters => . / : - | "
+		sleep 1;
+	#############
+	# DB name exists		
+	elif [[ -e $DBNAME ]] 
+	then
+		echo -e "This Database Name is already Exists."
+		sleep 1;
+	#############
+	# new DB
+	elif [[ $DBNAME =~ ^[a-zA-Z] ]]
+	then
+		mkdir -p "$DBNAME"
+		cd "./$DBNAME" > /dev/null 2>&1
+		newloc=`pwd`
+		if [[ "$newloc" = `pwd` ]]
+		then
+			echo -e "Database Created Sucessfully in $(pwd)."
+			sleep 1;
+			dbsScreen=false
+			tablesScreen=true
+		else
+			cd - > /dev/null 2>&1
+			echo -e "can't access this location."
+			sleep 1;
+		fi
+	#############
+	# numbers or other special characters
+	else
+		echo -e "Database Name can't Start with Numbers or Special Characters."
+		sleep 1;
+	fi
+}
+################################################################################
+# List of Databases
+function listDb {
+	# no databases exist
+	if [[ $(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d') = '' ]]
+	then
+		echo -e "There are no Databases here."
+		sleep 1;
+	############
+	# databases exist
+	else
+		separator;
+		echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
+		separator;
+		sleep 2;
+		dbsScreen=true
+		tablesScreen=false
+	fi
+}
+################################################################################
+# Connect to Database
+function connectDb {
+	# no databases exist
+	if [[ $(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d') = '' ]]
+	then
+		echo -e "There are no Databases here."
+		sleep 1;
+	############
+	# databases exist
+	else
+		echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
+		separator;
+			read -p "Enter the name of the Database:  " DBNAME
+			DBNAME="$DBNAME"
+			############
+			# null entry
+			if [[ "$DBNAME" = '' ]] 
+			then
+				echo -e "Invalid Entry, Please Enter a Correct Name."
+				sleep 1;
+			############
+			# DB doesn't exists
+			elif ! [[ -d "$DBNAME" ]]
+			then
+				echo -e "This Database doesn't Exist."
+				sleep 1;
+			############
+			# Connected to DB
+			else
+				cd "$DBNAME"
+				separator;
+				echo -e "The database Successfully Connected."
+				sleep 1;
+				dbsScreen=false
+				tablesScreen=true
+			fi
+	fi
+}
+################################################################################
+# Rename Database
+function renameDB {
+	echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
+	separator;
+		read -p "Enter Current Database Name: " DBNAME
+		read -p "Enter New Database Name: " newName
+		############
+		# null entry
+		if [[ "$DBNAME" = '' ]] 
+		then
+			echo -e "Invalid Entry, Please Enter a Correct Name."
+			sleep 1;
+		############
+		# DB doesn't exists
+		elif ! [[ -d "$DBNAME" ]] 
+		then
+			echo -e "This Database doesn't Exist."
+			sleep 1;
+		############
+		# rename DB	
+		elif [[ -d "$DBNAME" ]]
+		then
+			mv ./DBMS/$DBNAME ./DBMS/$newName  2>> ./.error.log
+			echo -e "Database $DBNAME Renamed Successfully and become $newName."
+			sleep 1;
+			dbsScreen=true
+			tablesScreen=false
+		else
+			echo "Error Renaming Database."
+			sleep 1;
+		fi
+}
+################################################################################
+# Drop Database
+function dropDb {
+	echo Databases:$''$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')
+	separator;
+		read -p "Enter the name of the Database:  " DBNAME
+		DBNAME="$DBNAME"
+		############
+		# null entry
+		if [[ "$DBNAME" = '' ]] 
+		then
+			echo -e "Invalid Entry, Please Enter a Correct Name."
+			sleep 1;
+		############
+		# DB doesn't exists
+		elif ! [[ -d "$DBNAME" ]] 
+		then
+			echo -e "This Database doesn't Exist."
+			sleep 1;
+		############
+		# drop DB	
+		else
+			rm -rf "$DBNAME"
+			echo -e "$DBNAME Removed from your Databases."
+			sleep 1;
+		fi
+}
+
 
 ################################################################################
 ######################### Tables Screen ########################################
@@ -276,180 +444,7 @@ function createMetaData {
 			##########
 		else
 			echo -e "Invalid Entry." 
-################################################################################
-########################### DBs Screen #########################################
-################################################################################
-# Create Database
-function createDb {
-	read -p "Enter Database Name: " DBNAME
-	#############
-	# null entry
-	if [[ $DBNAME = "" ]]
-	then
-		echo -e "Invalid Entry, please Enter a Correct Name."
-		sleep 1;
-	#############
-	# special characters
-	elif [[ $DBNAME =~ [/.:\|\-] ]] 
-	then
-		echo -e "You can't Enter these Characters => . / : - | "
-		sleep 1;
-	#############
-	# DB name exists		
-	elif [[ -e $DBNAME ]] 
-	then
-		echo -e "This Database Name is already Exists."
-		sleep 1;
-	#############
-	# new DB
-	elif [[ $DBNAME =~ ^[a-zA-Z] ]]
-	then
-		mkdir -p "$DBNAME"
-		cd "./$DBNAME" > /dev/null 2>&1
-		newloc=`pwd`
-		if [[ "$newloc" = `pwd` ]]
-		then
-			echo -e "Database Created Sucessfully in $(pwd)."
-			sleep 1;
-			dbsScreen=false
-			tablesScreen=true
-		else
-			cd - > /dev/null 2>&1
-			echo -e "can't access this location."
-			sleep 1;
-		fi
-	#############
-	# numbers or other special characters
-	else
-		echo -e "Database Name can't Start with Numbers or Special Characters."
-		sleep 1;
-	fi
 }
-################################################################################
-# List of Databases
-function listDb {
-	# no databases exist
-	if [[ $(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d') = '' ]]
-	then
-		echo -e "There are no Databases here."
-		sleep 1;
-	############
-	# databases exist
-	else
-		separator;
-		echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
-		separator;
-		sleep 2;
-		dbsScreen=true
-		tablesScreen=false
-	fi
-}
-################################################################################
-# Connect to Database
-function connectDb {
-	# no databases exist
-	if [[ $(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d') = '' ]]
-	then
-		echo -e "There are no Databases here."
-		sleep 1;
-	############
-	# databases exist
-	else
-		echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
-		separator;
-			read -p "Enter the name of the Database:  " DBNAME
-			DBNAME="$DBNAME"
-			############
-			# null entry
-			if [[ "$DBNAME" = '' ]] 
-			then
-				echo -e "Invalid Entry, Please Enter a Correct Name."
-				sleep 1;
-			############
-			# DB doesn't exists
-			elif ! [[ -d "$DBNAME" ]]
-			then
-				echo -e "This Database doesn't Exist."
-				sleep 1;
-			############
-			# Connected to DB
-			else
-				cd "$DBNAME"
-				separator;
-				echo -e "The database Successfully Connected."
-				sleep 1;
-				dbsScreen=false
-				tablesScreen=true
-			fi
-	fi
-}
-################################################################################
-# Rename Database
-function renameDB {
-	echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
-	separator;
-		read -p "Enter Current Database Name: " DBNAME
-		read -p "Enter New Database Name: " newName
-		############
-		# null entry
-		if [[ "$DBNAME" = '' ]] 
-		then
-			echo -e "Invalid Entry, Please Enter a Correct Name."
-			sleep 1;
-		############
-		# DB doesn't exists
-		elif ! [[ -d "$DBNAME" ]] 
-		then
-			echo -e "This Database doesn't Exist."
-			sleep 1;
-		############
-		# rename DB	
-		elif [[ -d "$DBNAME" ]]
-		then
-			mv ./DBMS/$DBNAME ./DBMS/$newName  2>> ./.error.log
-			echo -e "Database $DBNAME Renamed Successfully and become $newName."
-			sleep 1;
-			dbsScreen=true
-			tablesScreen=false
-		else
-			echo "Error Renaming Database."
-			sleep 1;
-		fi
-}
-################################################################################
-# Drop Database
-function dropDb {
-	echo Databases:$''$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')
-	separator;
-		read -p "Enter the name of the Database:  " DBNAME
-		DBNAME="$DBNAME"
-		############
-		# null entry
-		if [[ "$DBNAME" = '' ]] 
-		then
-			echo -e "Invalid Entry, Please Enter a Correct Name."
-			sleep 1;
-		############
-		# DB doesn't exists
-		elif ! [[ -d "$DBNAME" ]] 
-		then
-			echo -e "This Database doesn't Exist."
-			sleep 1;
-		############
-		# drop DB	
-		else
-			rm -rf "$DBNAME"
-			echo -e "$DBNAME Removed from your Databases."
-			sleep 1;
-		fi
-}
-
-################################################################################
-# Insert Data into Table
-function insertData {
-	# choose the table
-	read -p "Enter Name of the table: " dbtable
-	 
 
 ################################################################################
 # Create Table & its metadata
@@ -539,7 +534,6 @@ function deleteTable {
 	then
 		echo -e "This Table doesn't Exist."
 		sleep 1;
-<<<<<<< HEAD
 	else
 		##########
 		## table exists
@@ -657,6 +651,136 @@ function deleteTable {
 		done
 	fi
 }
+
+################################################################################
+# Insert Data into Table
+function insertData {
+	# choose the table
+	read -p "Enter Name of the table: " dbtable
+	 
+	# table not exist
+	if ! [[ -f "$dbtable" ]] 
+	then
+		echo -e "This Table doesn't Exist."
+		sleep 1;
+	else
+		##########
+		## table exists
+		insertingData=true
+		while $insertingData  
+		do
+			# enter pk
+			## => enter pk of type "id" of type integer and size 1
+			echo -e "Enter Primary Key \"$(head -1 "$dbtable" |
+			 	cut -d ':' -f1 | awk -F "-" '{print $1}')\" of type $(head -1 "$dbtable" |
+			  	cut -d ':' -f1 | awk -F "-" '{print $2}') and size $(head -1 "$dbtable" |
+			   	cut -d ':' -f1 | awk -F "-" '{print $3}')"
+
+			read
+			##########
+			# match data & size
+			check_type=$(check_dataType "$REPLY" "$dbtable" 1)
+			check_size=$(check_size "$REPLY" "$dbtable" 1)
+			#=> print all records except first record
+			pk_used=$(cut -d ':' -f1 "$dbtable" | awk '{if(NR != 1) print $0}' | grep -x -e "$REPLY") 
+			##########
+			# null entry
+			if [[ "$REPLY" == '' ]] 
+			then
+				echo -e "No entry."
+				sleep 1;
+			#############
+			# special characters
+			elif [[ $REPLY =~ [/.:\|\-] ]]
+			then
+				echo -e "You can't Enter these Characters => . / : - | "
+				sleep 1;
+			##########
+			# not matching datatype 
+			elif [[ "$check_type" == 0 ]] 
+			then 
+				echo -e "Entry Invalid."
+				sleep 1;
+			##########
+			# not matching size	
+			elif [[ "$check_size" == 0 ]] 
+			then
+				echo -e "Entry Size Invalid."
+				sleep 1;
+			##########
+			#! if primary key exists
+			elif ! [[ "$pk_used" == '' ]] 
+			then
+				echo -e "This Primary Key is already Used."
+				sleep 1;
+			##########
+			# primary key is valid
+			else 
+				echo -n "$REPLY" >> "$dbtable"
+				echo -n ':' >> "$dbtable"
+
+				# to get number of columns in table
+				num_col=$(head -1 "$dbtable" | awk -F: '{print NF}')
+				## to iterate over the columns after the primary key, in order to enter its data
+				for (( i = 2; i <= num_col; i++ )) 
+				do
+					# enter other data
+					inserting_other_data=true
+					while $inserting_other_data 
+					do
+						echo -e "Enter \"$(head -1 "$dbtable" |
+						 	cut -d ':' -f$i | awk -F "-" 'BEGIN { RS = ":" } {print $1}')\" of type $(head -1 "$dbtable" |
+						  	cut -d ':' -f$i | awk -F "-" 'BEGIN { RS = ":" } {print $2}') and size $(head -1 "$dbtable" |
+						   	cut -d ':' -f$i | awk -F "-" 'BEGIN { RS = ":" } {print $3}')"
+
+						read
+						##########
+						# match data with its col datatype & size
+						check_type=$(check_dataType "$REPLY" "$dbtable" "$i")
+						check_size=$(check_size "$REPLY" "$dbtable" "$i")
+						##########
+						# not matching datatype
+						if [[ "$check_type" == 0 ]] 
+						then
+							echo -e "Entry Invalid."
+							sleep 1;
+						##########
+						# not matching size
+						elif [[ "$check_size" == 0 ]] 
+						then
+							echo -e "Entry Size Invalid."
+							sleep 1;
+						#############
+						# special characters
+						elif [[ $REPLY =~ [/.:\|\-] ]] 
+						then
+							echo -e "You can't Enter these Characters => . / : - | "
+							sleep 1;
+						##########
+						# entry is valid
+						else
+							##########
+							# if last column
+							if [[ i -eq $num_col ]] 
+							then
+								echo "$REPLY" >> "$dbtable"
+								inserting_other_data=false
+								insertingData=false
+								echo -e "Entry Inserted Successfully."
+							else
+								##########
+								# next column 
+								echo -n "$REPLY": >> "$dbtable"
+								inserting_other_data=false
+							fi
+						fi
+					done
+				done
+			fi
+		done
+	fi
+}
+
 ################################################################################
 # Display Record (Row)
 function displayRow {
@@ -948,6 +1072,7 @@ function updateTable {
 		
 	fi
 }
+
 ################################################################################
 # Select from Table
 function selectMenu {
@@ -1167,19 +1292,16 @@ function specCond {
 		echo "Unsupported Operator."
 		selectCon
 		fi
-=======
 	##########
 	# exists
 	else
 		rm "$dbtable"
 		echo -e "Table Deleted."
 		sleep 1;
->>>>>>> 4b63785afffa9d345cae1beca29061e0d06f7a88
 	fi
 }
 
 ################################################################################
-<<<<<<< HEAD
 ######################### GUI ##################################################
 ################################################################################
 
@@ -1197,6 +1319,46 @@ do
 		welcomeScreen;
 	done
 	################################################################################
+    # Databases Screen
+	while $dbsScreen
+	do
+		clear
+		separator;
+		echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
+		separator;
+		select choice in "Create a new database" "List of Databases" "Connect To Database" "Drop Database" "Back" 
+		do 
+			case $REPLY in
+				1 ) # Create Database
+					separator;
+					createDb;
+					;;
+				2 ) # List Databases
+					separator;
+					listDb;
+					;;	
+				3 ) # Use existing (connect to DB)
+					separator;
+					connectDb;
+					;;	
+				4 ) # Drop Database
+					separator;
+					dropDb;
+					;;	
+				5 ) # Back
+					cd ..
+					welcomeScreen=true
+					dbsScreen=false
+					tablesScreen=false
+					;;
+				* )
+					echo -e "Invalid Entry."
+					sleep 1;
+					;;
+			esac
+            break
+		done
+	done
     ################################################################################
 	#Tables Screen
 	while $tablesScreen 
@@ -1252,54 +1414,13 @@ do
 					cd ..
 					welcomeScreen=false
 					dbsScreen=true
-=======
-# Databases Screen
-	while $dbsScreen
-	do
-		clear
-		separator;
-		echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
-		separator;
-		select choice in "Create a new database" "List of Databases" "Connect To Database" "Drop Database" "Back" 
-		do 
-			case $REPLY in
-				1 ) # Create Database
-					separator;
-					createDb;
-					;;
-				2 ) # List Databases
-					separator;
-					listDb;
-					;;	
-				3 ) # Use existing (connect to DB)
-					separator;
-					connectDb;
-					;;	
-				4 ) # Drop Database
-					separator;
-					dropDb;
-					;;	
-				5 ) # Back
-					cd ..
-					welcomeScreen=true
-					dbsScreen=false
->>>>>>> 4b63785afffa9d345cae1beca29061e0d06f7a88
-					tablesScreen=false
-					;;
-				* )
+                * )
 					echo -e "Invalid Entry."
 					sleep 1;
 					;;
-			esac
-<<<<<<< HEAD
-			break
-		done
-	done
-################################################################################
-done
-=======
-		break
+            esac        
+		    break
 		done
 	done
 	################################################################################
->>>>>>> 4b63785afffa9d345cae1beca29061e0d06f7a88
+done
