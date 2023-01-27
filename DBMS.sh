@@ -89,3 +89,193 @@ function welcomeScreen {
 		break
 	done 
 }
+
+
+################################################################################
+######################### Tables Screen ########################################
+################################################################################
+# create tables' metadata
+function createMetaData {
+	# create the metadata
+		if [[ -f "$dbtable" ]]
+		then
+			##########
+			# num of cols
+			validMetaData=true
+			while $validMetaData
+			do
+				read -p "How Many Columns you want?  " num_col
+
+				if [[ "$num_col" = +([1-9])*([0-9]) ]]
+				then
+					validMetaData=false
+				else
+					echo -e "Invalid Entry."
+					sleep 1;
+				fi
+			done
+			##########
+			## pk name
+			validMetaData=true
+			while $validMetaData
+			do
+				read -p "Enter Primary Key Name: " pk_name
+				#############
+				# null entry
+				if [[ $pk_name = "" ]] 
+				then
+					echo -e "Invalid Entry, Please Enter a Correct Name."
+					sleep 1;
+				#############
+				# special characters
+				elif [[ $pk_name =~ [/.:\|\-] ]]
+				then
+					echo -e "You can't Enter these Characters => . / : - | "
+					sleep 1;
+				############
+				# valid entry
+				elif [[ $pk_name =~ ^[a-zA-Z] ]] 
+				then
+					echo -n "$pk_name" >> "$dbtable"
+					echo -n "-" >> "$dbtable"
+					validMetaData=false
+				#############
+				# numbers or other special characters
+				else
+					echo -e " Primary Key can't Start with Numbers or Special Characters."
+					sleep 1;
+				fi
+			done
+			##########
+			# pk dataType
+			validMetaData=true
+			while $validMetaData
+			do
+				echo -e "Enter Primary Key Datatype: "
+
+				select choice in "integer" "string" 
+				do
+					if [[ "$REPLY" = "1" || "$REPLY" = "2" ]] 
+					then
+						echo -n "$choice" >> "$dbtable"
+						echo -n "-" >> "$dbtable"
+						validMetaData=false
+					else
+						echo -e "Invalid Choice."
+						sleep 1;
+					fi
+					break
+				done
+			done
+			########## 
+			# pk size
+			validMetaData=true
+			while $validMetaData 
+			do
+				read -p "Enter Primary Key Size: " size
+				 
+				if [[ "$size" = +([1-9])*([0-9]) ]] 
+				then
+					echo -n "$size" >> "$dbtable"
+					echo -n ":" >> "$dbtable"
+					validMetaData=false
+				else
+					echo -e "Invalid Entry."
+					sleep 1;
+				fi
+			done
+			##########
+			## to iterate over the enterd num of columns after the primary key, in order to enter its metadata
+			for (( i = 1; i < num_col; i++ ))
+			do
+				##########
+				# field name
+				validMetaData=true
+				while $validMetaData 
+				do
+					read -p "Enter Field $[i+1] Name: " field_name
+					
+					# null entry
+					if [[ $field_name = "" ]]
+					then
+						echo -e "Invalid Entry, Please Enter a Correct Name."
+						sleep 1;
+					#############
+					# special characters
+					elif [[ $field_name =~ [/.:\|\-] ]] 
+					then
+						echo -e "You can't Enter these Characters => . / : - | "
+						sleep 1;
+					############
+					# valid entry
+					elif [[ $field_name =~ ^[a-zA-Z] ]] 
+					then
+						echo -n "$field_name" >> "$dbtable"
+						echo -n "-" >> "$dbtable"
+						sleep 1;
+						validMetaData=false
+					#############
+					# numbers or other special characters
+					else
+						echo -e "Field Name can't Start with Numbers or Special Characters."
+						sleep 1;
+					fi
+				done
+				##########
+				# field dataType
+				validMetaData=true
+				while $validMetaData
+				do
+					echo -e "Enter Field $[i+1] Datatype: "
+
+					select choice in "integer" "string" 
+					do
+						if [[ "$REPLY" = "1" || "$REPLY" = "2" ]] 
+						then
+							echo -n "$choice" >> "$dbtable"
+							echo -n "-" >> "$dbtable"
+							sleep 1;
+							validMetaData=false
+						else
+							echo -e "Invalid Choice."
+							sleep 1;
+						fi
+						break
+					done
+				done
+				##########
+				# field size
+				validMetaData=true
+				while $validMetaData 
+				do
+					read -p "Enter Field $[i+1] Size: " size
+					 
+					if [[ "$size" = +([1-9])*([0-9]) ]] 
+					then
+						echo -n "$size" >> "$dbtable"
+						##########
+						# if last column
+						if [[ i -eq $num_col-1 ]] 
+						then
+							echo $'' >> "$dbtable"
+							echo -e "Table Created Successfully."
+							sleep 1;
+						##########
+						# next column
+						else
+							echo -n ":" >> "$dbtable"
+						fi
+						validMetaData=false
+					else
+						echo -e "Invalid Entry."
+						sleep 1;
+					fi
+				done
+				##########
+			done
+			##########
+		else
+			echo -e "Invalid Entry." 
+			sleep 1;
+		fi
+}
