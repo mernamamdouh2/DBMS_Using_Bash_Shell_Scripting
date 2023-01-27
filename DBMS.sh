@@ -885,3 +885,38 @@ function allCond {
 		fi
 	fi
 }
+################################################################################
+# Select specific Column under Condition
+function specCond {
+  	echo -e "Select specific column from TABLE Where FIELD(OPERATOR)VALUE."
+	read -p "Enter Table Name: "  tName
+	read -p "Enter required FIELD name-type-size: " field
+
+	fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' $tName)
+	if [[ $fid == "" ]]
+	then
+		echo "Not Found"
+		selectCon
+	else
+		read -p "Supported Operators: [==, !=, >, <, >=, <=] Select OPERATOR: " op
+
+		if [[ $op == "==" ]] || [[ $op == "!=" ]] || [[ $op == ">" ]] || [[ $op == "<" ]] || [[ $op == ">=" ]] || [[ $op == "<=" ]]
+		then
+		read -p "Enter required VALUE: " val
+
+		res=$(awk 'BEGIN{FS=":"; ORS="\n"}{if ($'$fid$op$val') print $'$fid'}' $tName 2>>./.error.log |  column -t -s ':')
+		if [[ $res == "" ]]
+		then
+			echo "Value Not Found."
+			selectCon
+		else
+			echo -e "\n------------------------------------------------------------"
+			awk 'BEGIN{FS=":"; ORS="\n"}{if ($'$fid$op$val') print $'$fid'}' $tName 2>>./.error.log |  column -t -s ':'
+			selectCon
+		fi
+		else
+		echo "Unsupported Operator."
+		selectCon
+		fi
+	fi
+}
