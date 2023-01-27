@@ -939,3 +939,70 @@ do
 		welcomeScreen;
 	done
 	################################################################################
+    ################################################################################
+	#Tables Screen
+	while $tablesScreen 
+	do
+		clear
+		separator;
+		echo -e "\t\tYour Existing Tables: \n$(find -maxdepth 1 -type f | cut -d'/' -f2)"
+		separator;
+		select choice in "Create a new Table" "List of Tables" "Display Table" "Delete Table" "Insert into Table" "Select From Table" "Delete row" "Update Table" "Back" 
+		do 
+			case $REPLY in
+				1 ) # create table
+					separator;
+					createTable;
+					;;
+					##########
+				2 ) # List tables
+					separator;
+					listTables;
+					;;
+					##########
+				3 ) # Display table
+					separator;
+					displayTable;
+					;;
+					##########
+				4 ) # delete table
+					separator;
+					deleteTable;
+					;;
+					##########	
+				5 ) # insert into table
+					separator;
+					insertData;
+					;;
+					##########
+				6 ) # Select From Table
+					separator;
+					selectMenu;
+					;;
+					##########
+				7 ) # delete record
+					separator;
+					deleteRecord;
+					;;
+					##########		
+				8 ) # update table
+					separator;
+					updateTable;
+					;;
+					##########
+				9 ) # back
+					cd ..
+					welcomeScreen=false
+					dbsScreen=true
+					tablesScreen=false
+					;;
+				* )
+					echo -e "Invalid Entry."
+					sleep 1;
+					;;
+			esac
+			break
+		done
+	done
+################################################################################
+done
