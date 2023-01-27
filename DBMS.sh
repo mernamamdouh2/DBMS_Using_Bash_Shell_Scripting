@@ -750,3 +750,12 @@ function selectAll {
 	fi
 	selectMenu
 }
+################################################################################
+# Select Column (Col)
+function selectCol {
+  read -p "Enter Table Name: " tName
+  read -p "Enter Column Number: " colNum
+ 
+  awk 'BEGIN{FS=":"}{print $'$colNum'}' $tName
+  selectMenu
+}
