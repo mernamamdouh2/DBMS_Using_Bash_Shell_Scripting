@@ -816,3 +816,38 @@ function selectRow {
 		selectMenu
 	fi
 }
+################################################################################
+# Select under Condition
+function selectCon {
+	separator;
+		echo -e "\t\tYour Existing Databases:$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
+		separator;
+		select choice in "Select All Columns Matching Condition" "Select Specific Column Matching Condition" "Back To Selection Menu" "Back TO Tables Menu" 
+		do 
+			case $REPLY in
+				1 ) # Select All Columns Matching Condition
+					separator;
+					allCond;
+					;;
+				2 ) # Select Specific Column Matching Condition
+					separator;
+					specCond;
+					;;	
+				3 ) # Back To Selection Menu 
+					separator;
+					selectMenu;
+					;;		
+				4 ) # Back TO Tables Menu 
+					cd ..
+					welcomeScreen=false
+					dbsScreen=false
+					tablesScreen=true
+					;;
+				* )
+					echo -e "Invalid Entry."
+					sleep 1;
+					;;
+			esac
+		break
+		done
+}
