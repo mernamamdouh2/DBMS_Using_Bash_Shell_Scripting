@@ -139,3 +139,32 @@ function renameDB {
 		fi
 }
 ################################################################################
+# Drop Database
+function dropDb {
+	echo Databases:$''$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')
+	separator;
+		read -p "Enter the name of the Database:  " DBNAME
+		DBNAME="$DBNAME"
+		############
+		# null entry
+		if [[ "$DBNAME" = '' ]] 
+		then
+			echo -e "Invalid Entry, Please Enter a Correct Name."
+			sleep 1;
+		############
+		# DB doesn't exists
+		elif ! [[ -d "$DBNAME" ]] 
+		then
+			echo -e "This Database doesn't Exist."
+			sleep 1;
+		############
+		# drop DB	
+		else
+			rm -rf "$DBNAME"
+			echo -e "$DBNAME Removed from your Databases."
+			sleep 1;
+		fi
+}
+
+
+################################################################################
