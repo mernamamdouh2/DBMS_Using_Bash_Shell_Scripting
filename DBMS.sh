@@ -265,3 +265,44 @@ function deleteTable {
 }
 
 ################################################################################
+# Databases Screen
+	while $dbsScreen
+	do
+		clear
+		separator;
+		echo -e "\t\tYour Existing Databases: \n$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')"
+		separator;
+		select choice in "Create a new database" "List of Databases" "Connect To Database" "Drop Database" "Back" 
+		do 
+			case $REPLY in
+				1 ) # Create Database
+					separator;
+					createDb;
+					;;
+				2 ) # List Databases
+					separator;
+					listDb;
+					;;	
+				3 ) # Use existing (connect to DB)
+					separator;
+					connectDb;
+					;;	
+				4 ) # Drop Database
+					separator;
+					dropDb;
+					;;	
+				5 ) # Back
+					cd ..
+					welcomeScreen=true
+					dbsScreen=false
+					tablesScreen=false
+					;;
+				* )
+					echo -e "Invalid Entry."
+					sleep 1;
+					;;
+			esac
+		break
+		done
+	done
+	################################################################################
