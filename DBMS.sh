@@ -52,3 +52,40 @@ function separator {
 function welcomeMsg {
 	echo -e "\n\tBash Shell Scripting Project - DBMS \n\tFull Stack Web Development using Python\n\tMerna Mamdouh & Aya Hassan\n";
 }
+
+# ------------------------------- database functions --------------------------------------
+
+################################################################################
+######################### Welcome Screen #######################################
+################################################################################
+function welcomeScreen {
+	welcomeMsg;
+	separator;
+	select choice in "Enter to Our Database" "Exit"
+	do
+		case $REPLY in
+			1 )
+				if ! [[  -e `pwd`/DBMS ]]
+                then
+					mkdir -p ./DBMS
+				fi
+				cd ./DBMS/
+
+				welcomeScreen=false
+				dbsScreen=true
+				separator;
+                
+				echo -e "Database is Loading... "
+				sleep 1;
+				;;
+			2 )
+				exit
+				;;
+			* )
+				echo -e "Invalid Entry."
+				sleep 1;
+				;;
+		esac
+		break
+	done 
+}
