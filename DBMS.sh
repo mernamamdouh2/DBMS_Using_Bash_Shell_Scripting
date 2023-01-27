@@ -205,3 +205,21 @@ function createTable {
 	# done
 }
 ################################################################################
+# List of Tables
+function listTables {
+	# no Tables exist
+	if [[ $(find -maxdepth 1 -type f | cut -d'/' -f2) = '' ]]
+	then
+		echo -e "There are no Tables here."
+		sleep 1;
+	############
+	# Tables exist
+	else
+		separator;
+		echo -e "\t\tYour Existing Tables: \n$(find -maxdepth 1 -type f | cut -d'/' -f2)"
+		sleep 2;
+		separator;
+		tablesScreen=true
+	fi
+}
+################################################################################
