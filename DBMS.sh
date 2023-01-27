@@ -699,3 +699,42 @@ function updateTable {
 		
 	fi
 }
+################################################################################
+# Select from Table
+function selectMenu {
+	separator;
+	echo Databases:$(find -maxdepth 1 -type d | cut -d'/' -f2 | sed '1d')
+	separator;
+		select choice in "Select All Columns from a Table" "Select Specific Column from a Table" "Select Specific Row from a Table" "Select From Table under condition" "Back" 
+		do 
+			case $REPLY in
+				1 ) # Select All Columns from a Table
+					separator;
+					selectAll;
+					;;
+				2 ) # Select Specific Column from a Table
+					separator;
+					selectCol;
+					;;	
+				3 ) # Select Specific Row from a Table
+					separator;
+					selectRow;
+					;;		
+				4 ) # Select From Table under condition
+					separator;
+					selectCon;
+					;;
+				5 ) # Back
+					cd ..
+					welcomeScreen=false
+					dbsScreen=false
+					tablesScreen=true
+					;;
+				* )
+					echo -e "Invalid Entry."
+					sleep 1;
+					;;
+			esac
+		break
+		done
+}
