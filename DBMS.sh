@@ -1185,13 +1185,7 @@ function specCond {
 		echo "Unsupported Operator."
 		selectCon
 		fi
-	##########
-	# exists
-	else
-		rm "$dbtable"
-		echo -e "Table Deleted."
-		sleep 1;
-	fi
+    fi
 }
 
 ################################################################################
