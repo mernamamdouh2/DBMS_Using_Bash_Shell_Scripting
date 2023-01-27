@@ -223,3 +223,26 @@ function listTables {
 	fi
 }
 ################################################################################
+# Display Table
+function displayTable {
+	# choose table
+	read -p "Enter Name of the table: " dbtable
+
+	# table not exist
+	if ! [[ -f "$dbtable" ]]; then
+		echo -e "This Table doesn't Exist."
+		sleep 1;
+	else
+		##########
+		## table exists
+		##########
+		# display table's data
+		echo "------------------------------------------------------------"
+		head -1 "$dbtable" | awk 'BEGIN{ RS = ":"; FS = "-" } {print $1}' | awk 'BEGIN{ORS="\t"} {print $0}'
+		echo -e "\n------------------------------------------------------------"
+		sed '1d' "$dbtable" | awk -F: 'BEGIN{OFS="\t"} {for(n = 1; n <= NF; n++) $n=$n}  1'
+		echo -e "\n------------------------------------------------------------"
+		sleep 3;
+	fi
+}
+################################################################################
